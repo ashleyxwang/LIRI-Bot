@@ -12,7 +12,9 @@ switch (command) {
         concertThis(searchTerm);
         break;
     case "spotify-this-song":
-        spotifyThisSong(searchTerm);
+        if (!searchTerm) {
+            spotifyThisSong("The Sign Ace of Base")
+        } else {spotifyThisSong(searchTerm)}
         break;
     case "movie-this":
         movieThis(searchTerm);
@@ -31,31 +33,34 @@ function spotifyThisSong(song) {
     spotifyInfo.search({
         type: "track",
         query: song,
-        limit: 1
-
+        limit: 5,
     }, function(err, response) {
-        if (err) {
-            console.log(":( "+ err);
-        } else if (!err) {
-            console.log("Spotifying: " + song);
-            console.log("-------------------");       
-            getSpotifyInfo(response);
+        console.log("Spotifying: " + song);
+
+        for (let i = 0; i < response.tracks.items.length; i++) {
+            const ogPath = response.tracks.items[i];    
+            const songName = ogPath.name;
+            const artist = ogPath.artists[0].name;
+            const album = ogPath.album.name;
+            const previewURL = ogPath.preview_url;
+            if (!searchTerm) {
+                console.log("Your search term was invalid so we took the sign and are showing you The Sign--");
+
+                response.tracks.items.length = 1;
+
+                console.log(`
+                The song ${songName} in the album ${album} by ${artist} can previewed here: 
+                ${previewURL}`);
+
+            } else if (!err) {
+                console.log(`
+                ------------------------------------
+                The song ${songName} in the album ${album} by ${artist} can previewed here: 
+                ${previewURL}`);
+            }
         }
     });
 }
-
-function getSpotifyInfo(data) {
-    const ogPath = data.tracks.items[0];    
-    const songName = ogPath.name;
-    const artist = ogPath.artists[0].name;
-    const album = ogPath.album.name;
-    const previewURL = ogPath.preview_url;
-    console.log(`The song ${songName} in the album ${album} by ${artist} can previewed here: 
-    ${previewURL}`);
-}
-//     get Artist(s), Song Name, Album, Preview Link
-//     no song: "The Sign" by Ace of Base
-// }
 
 function concertThis(concert) {
     console.log("Concerting: " + concert);
