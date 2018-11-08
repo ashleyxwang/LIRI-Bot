@@ -27,7 +27,6 @@ switch (command) {
 
 function spotifyThisSong(song) {
     const spotifyInfo = new spotify(keysFile.spotify);
-    console.log("Spotifying: " + song);
 
     spotifyInfo.search({
         type: "track",
@@ -38,20 +37,21 @@ function spotifyThisSong(song) {
         if (err) {
             console.log(":( "+ err);
         } else if (!err) {
-            // const spotifyInfo = JSON.stringify(response);
-            // const spotifyInfoObj = JSON.parse(spotifyInfo);
-            // console.log(spotifyInfo);
-            console.log("-------------------");
+            console.log("Spotifying: " + song);
+            console.log("-------------------");       
             getSpotifyInfo(response);
         }
     });
 }
 
 function getSpotifyInfo(data) {
-    const liriSongOutputs = ["artists", "name", "album", "external_urls"];
-    const artist = data.tracks.items[0].artists[0].name;
-    console.log(artist);
-
+    const ogPath = data.tracks.items[0];    
+    const songName = ogPath.name;
+    const artist = ogPath.artists[0].name;
+    const album = ogPath.album.name;
+    const previewURL = ogPath.preview_url;
+    console.log(`The song ${songName} in the album ${album} by ${artist} can previewed here: 
+    ${previewURL}`);
 }
 //     get Artist(s), Song Name, Album, Preview Link
 //     no song: "The Sign" by Ace of Base
@@ -74,7 +74,6 @@ function movieThis(movie) {
             if (!error && response.statusCode === 200) {
                 const omdbMrNobody = JSON.parse(body);
                 getMovieInfo(omdbMrNobody);
-                // console.log(JSON.parse(body));
             }
         });
 
