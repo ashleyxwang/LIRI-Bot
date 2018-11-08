@@ -19,6 +19,8 @@
   "homepage": "https://github.com/ashleyxwang/LIRI-Bot#readme",
   "dependencies": {
     "dotenv": "^6.1.0",
-    "request": "^2.88.0"
+    "moment": "^2.22.2",
+    "request": "^2.88.0",
+    "node-spotify-api": "^1.0.7",
   }
 }

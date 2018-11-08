@@ -1,8 +1,10 @@
 require("dotenv").config();
 const keysFile = require("./keys");
 const request = require("request");
-const searchTerm = process.argv[3];
+const CLIinput = process.argv;
 const command = process.argv[2];
+const searchTerm = CLIinput.slice(3).join(' ');
+const spotify = require("node-spotify-api");
 
 //make decision based on the command
 switch (command) {
@@ -24,12 +26,42 @@ switch (command) {
 }
 
 function spotifyThisSong(song) {
+    const spotifyInfo = new spotify(keysFile.spotify);
     console.log("Spotifying: " + song);
+
+    spotifyInfo.search({
+        type: "track",
+        query: song,
+        limit: 1
+
+    }, function(err, response) {
+        if (err) {
+            console.log(":( "+ err);
+        } else if (!err) {
+            // const spotifyInfo = JSON.stringify(response);
+            // const spotifyInfoObj = JSON.parse(spotifyInfo);
+            // console.log(spotifyInfo);
+            console.log("-------------------");
+            getSpotifyInfo(response);
+        }
+    });
 }
+
+function getSpotifyInfo(data) {
+    const liriSongOutputs = ["artists", "name", "album", "external_urls"];
+    const artist = data.tracks.items[0].artists[0].name;
+    console.log(artist);
+
+}
+//     get Artist(s), Song Name, Album, Preview Link
+//     no song: "The Sign" by Ace of Base
+// }
 
 function concertThis(concert) {
     console.log("Concerting: " + concert);
+    const bandsURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp"
 }
+
 
 function movieThis(movie) {
     const url = `http://www.omdbapi.com/?i=${keysFile.omdb.id}&apikey=${keysFile.omdb.apiKey}&t=${movie}`;
@@ -40,7 +72,9 @@ function movieThis(movie) {
         console.log("Invalid movie search..Mr.Nobody is cool though");
         request(backupURL, function(error, response, body) {
             if (!error && response.statusCode === 200) {
-                console.log(JSON.parse(body));
+                const omdbMrNobody = JSON.parse(body);
+                getMovieInfo(omdbMrNobody);
+                // console.log(JSON.parse(body));
             }
         });
 
@@ -48,24 +82,25 @@ function movieThis(movie) {
         console.log(`I'm movieing ${movie} :)`);
         request(url, function(error, response, body) {
             if (!error && response.statusCode === 200) {
-            const movieInfo = JSON.parse(body);
-            const mackWant = ["Title", "Year", "imdbRating", "Ratings", "Country", "Language", "Plot", "Actors"];
-            console.log(typeof(movieInfo));
-            Object.keys(movieInfo).forEach(element => {
-                if (mackWant.includes(element)) {
-                    if (element === "Ratings") {
-                        // tiddies
-                        let ratingsArray = movieInfo[element];
-                        let RTRatings = ratingsArray
-                            .find(ele => ele.Source === "Rotten Tomatoes").Value;
-                        console.log(`Rotten Tomatoes: ${RTRatings}`);
-                    }
-                    else {console.log(`${element}: ${movieInfo[element]}`);}
-                };
-            });
-                // console.log(movieInfo);
-                // console.log(JSON.parse(body).Search[0].Title, JSON.parse(body).Search[1].Year);
+            const omdbInfo = JSON.parse(body);
+            getMovieInfo(omdbInfo);
             }
         });
     }
+}
+
+function getMovieInfo(omdbInfo) {
+    const liriMovieOutputs = ["Title", "Year", "imdbRating", "Ratings", "Country", "Language", "Plot", "Actors"];
+    Object.keys(omdbInfo).forEach(objectKey => {
+        if (liriMovieOutputs.includes(objectKey)) {
+            if (objectKey === "Ratings") {
+                let ratingsArray = omdbInfo[objectKey];
+                let RTRatings = ratingsArray.find(ele => ele.Source === "Rotten Tomatoes").Value;
+                console.log(`Rotten Tomatoes: ${RTRatings}`);
+            }
+            else {
+                console.log(`${objectKey}: ${omdbInfo[objectKey]}`);
+            }
+        }
+    });
 }
