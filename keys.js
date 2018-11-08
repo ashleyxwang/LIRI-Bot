@@ -1,5 +1,3 @@
-console.log("*this is loaded*");
-
 exports.bands = {
     id: process.env.BANDS_APP_ID
 }
