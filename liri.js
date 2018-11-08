@@ -74,7 +74,7 @@ function spotifyThisSong(song) {
             const artist = ogPath.artists[0].name;
             const album = ogPath.album.name;
             const previewURL = ogPath.preview_url;
-            if (!searchTerm) {
+            if (!song) {
                 console.log("Your search term was invalid so we took the sign and are showing you The Sign--");
 
                 response.tracks.items.length = 1;
@@ -135,7 +135,27 @@ function getMovieInfo(omdbInfo) {
 }
 
 function doWhatItSays () {
-    const textCommand = fs.readFileSync("./random.txt", "utf8")
-        console.log(textCommand);
-    
+    const txtData = fs.readFileSync("./random.txt", "utf8")
+    const splitTxt = txtData.split(",");
+    const command = splitTxt[0];
+    const searchTerm = splitTxt.slice(1).join(' ').trim();
+
+    switch (command) {
+    case "concert-this":
+        if (!searchTerm) {
+            console.log("Invalid artist name, try again!")
+    } else {concertThis(searchTerm)}
+        break;
+    case "spotify-this-song":
+        if (!searchTerm) {
+            spotifyThisSong("The Sign Ace of Base")
+        } else {spotifyThisSong(searchTerm)}
+        break;
+    case "movie-this":
+        movieThis(searchTerm);
+        break;
+    default:
+        console.log("No Comprende :/ Ask le Foogle Bot");
+        break;
+    }
 }
