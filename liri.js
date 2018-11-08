@@ -17,11 +17,14 @@ switch (command) {
         break;
     case "spotify-this-song":
         if (!searchTerm) {
-            spotifyThisSong("The Sign Ace of Base")
-        } else {spotifyThisSong(searchTerm)}
+            spotifyThisSong("The Sign Ace of Base");
+        } else { spotifyThisSong(searchTerm)}
         break;
     case "movie-this":
-        movieThis(searchTerm);
+        if (!searchTerm) {
+            console.log("Did you mean Mr. Nobody?");
+            movieThis("Mr. Nobody");
+        } else { movieThis(searchTerm);}
         break;
     case "do-what-it-says":
         doWhatItSays();
@@ -96,36 +99,29 @@ function spotifyThisSong(song) {
 function movieThis(movie) {
     const url = `http://www.omdbapi.com/?i=${keysFile.omdb.id}&apikey=${keysFile.omdb.apiKey}&t=${movie}`;
 
-    const backupURL = `http://www.omdbapi.com/?i=${keysFile.omdb.id}&apikey=${keysFile.omdb.apiKey}&t=Mr.Nobody`;
+    console.log(`I'm movieing ${movie} :)`);
 
-    if (movie === undefined) {
-        console.log("Invalid movie search..Mr.Nobody is cool though");
-        request(backupURL, function(error, response, body) {
-            if (!error && response.statusCode === 200) {
-                const omdbMrNobody = JSON.parse(body);
-                getMovieInfo(omdbMrNobody);
-            }
-        });
-
-    } else { 
-        console.log(`I'm movieing ${movie} :)`);
-        request(url, function(error, response, body) {
-            if (!error && response.statusCode === 200) {
-            const omdbInfo = JSON.parse(body);
-            getMovieInfo(omdbInfo);
-            }
-        });
-    }
+    request(url, function(error, response, body) {
+        if (!error && response.statusCode === 200) {
+        const omdbInfo = JSON.parse(body);
+        getMovieInfo(omdbInfo);
+        }
+    });
 }
 
 function getMovieInfo(omdbInfo) {
     const liriMovieOutputs = ["Title", "Year", "imdbRating", "Ratings", "Country", "Language", "Plot", "Actors"];
+
     Object.keys(omdbInfo).forEach(objectKey => {
         if (liriMovieOutputs.includes(objectKey)) {
             if (objectKey === "Ratings") {
                 let ratingsArray = omdbInfo[objectKey];
-                let RTRatings = ratingsArray.find(ele => ele.Source === "Rotten Tomatoes").Value;
-                console.log(`Rotten Tomatoes: ${RTRatings}`);
+                if (ratingsArray.length < 2) {
+                console.log("Rotten Tomatoes: No Rating");
+                } else {
+                    let RTRatings = ratingsArray.find(ele => ele.Source === "Rotten Tomatoes").Value;
+                    console.log(`Rotten Tomatoes: ${RTRatings}`);
+                }
             }
             else {
                 console.log(`${objectKey}: ${omdbInfo[objectKey]}`);
