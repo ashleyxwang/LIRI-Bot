@@ -1,6 +1,8 @@
 require("dotenv").config();
 const keysFile = require("./keys");
+const fs = require("fs")
 const request = require("request");
+const moment = require("moment");
 const CLIinput = process.argv;
 const command = process.argv[2];
 const searchTerm = CLIinput.slice(3).join(' ');
@@ -9,7 +11,9 @@ const spotify = require("node-spotify-api");
 //make decision based on the command
 switch (command) {
     case "concert-this":
-        concertThis(searchTerm);
+        if (!searchTerm) {
+            console.log("Invalid artist name, try again!")
+    } else {concertThis(searchTerm)}
         break;
     case "spotify-this-song":
         if (!searchTerm) {
@@ -25,6 +29,33 @@ switch (command) {
     default:
         console.log("No Comprende :/ Ask le Foogle Bot");
         break;
+}
+
+//event find by artist; show: name of venue, location, and date(MM/DD/YYYY)
+function concertThis(artist) {
+    const bandsURL = "https://rest.bandsintown.com/artists/" + artist + `/events?app_id=${keysFile.band}`;
+
+    request(bandsURL, function(err, response, body) {
+        const allInfo = JSON.parse(body);
+        console.log("Upcoming " + artist + " concerts--");
+        if (allInfo.length < 1) {
+            console.log("This artist has no upcoming concerts.");
+        } else if (!err && response.statusCode === 200){
+            for (let i = 0; i < 5; i++) {
+                const eventVenue = allInfo[i].venue;
+                const state = eventVenue.region;
+                const eventDate = moment(allInfo[0].datetime).format("MM/DD/YYYY h:mm a" );
+                //formatted concert search response
+                if (!state) {
+                    console.log(`This concert is at the ${eventVenue.name} in ${eventVenue.city}, ${eventVenue.country} at ${eventDate}
+                    `);
+                } else {
+                    console.log(`This concert is at the ${eventVenue.name} in ${eventVenue.city}, ${state}, ${eventVenue.country} at ${eventDate}
+                    `);
+                }
+            }
+        }
+    });
 }
 
 function spotifyThisSong(song) {
@@ -61,12 +92,6 @@ function spotifyThisSong(song) {
         }
     });
 }
-
-function concertThis(concert) {
-    console.log("Concerting: " + concert);
-    const bandsURL = "https://rest.bandsintown.com/artists/" + artist + "/events?app_id=codingbootcamp"
-}
-
 
 function movieThis(movie) {
     const url = `http://www.omdbapi.com/?i=${keysFile.omdb.id}&apikey=${keysFile.omdb.apiKey}&t=${movie}`;
@@ -107,4 +132,10 @@ function getMovieInfo(omdbInfo) {
             }
         }
     });
+}
+
+function doWhatItSays () {
+    const textCommand = fs.readFileSync("./random.txt", "utf8")
+        console.log(textCommand);
+    
 }
